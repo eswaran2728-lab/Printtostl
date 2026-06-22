@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --gold: #d4a017;
+  --navy: #0d1b2a;
+}
+
+body {
+  background-color: #0a0a0a;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+}
+
+.gold-gradient {
+  background: linear-gradient(135deg, #d4a017 0%, #f0c040 50%, #a07010 100%);
+}
+
+.card-glass {
+  background: rgba(13, 27, 42, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(212, 160, 23, 0.2);
+}
+
+.upload-zone {
+  border: 2px dashed rgba(212, 160, 23, 0.4);
+  transition: all 0.3s ease;
+}
+
+.upload-zone:hover {
+  border-color: #d4a017;
+  background: rgba(212, 160, 23, 0.05);
+}
+
+.progress-step-active {
+  color: #d4a017;
+}
+
+.progress-step-done {
+  color: #4ade80;
+}
+
+@keyframes pulse-gold {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(212, 160, 23, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(212, 160, 23, 0); }
+}
+
+.animate-pulse-gold {
+  animation: pulse-gold 2s infinite;
+}
