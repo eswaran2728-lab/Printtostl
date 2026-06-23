@@ -18,7 +18,6 @@ export function Navbar() {
             <Link href="/pricing" className="text-gray-400 hover:text-white text-sm transition-colors">Pricing</Link>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/login"><Button variant="ghost" size="sm">Sign In</Button></Link>
             <Link href="/dashboard"><Button size="sm">Start Creating</Button></Link>
           </div>
         </div>

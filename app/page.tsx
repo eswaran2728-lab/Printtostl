@@ -257,7 +257,7 @@ export default function HomePage() {
                     </li>
                   ))}
                 </ul>
-                <Link href={i === 0 ? '/register' : '/dashboard/new-project'}>
+                <Link href="/dashboard/new-project">
                   <button className={`w-full py-2.5 rounded-lg font-semibold text-sm transition-all ${tier.highlight ? 'bg-gold text-black hover:bg-gold-light' : 'border border-gold/40 text-gold hover:bg-gold/10'}`}>
                     {tier.cta}
                   </button>
