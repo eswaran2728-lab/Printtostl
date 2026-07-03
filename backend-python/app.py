@@ -7,6 +7,7 @@ TODO: Connect to Meshy API, Tripo API, Hunyuan3D, or TripoSR for generation.
 from flask import Flask, request, jsonify
 import blender_repair
 import mesh_checks
+import auto_sculpt
 
 app = Flask(__name__)
 
@@ -34,6 +35,13 @@ def export_model():
     model_path = data.get('model_path')
     output_format = data.get('format', 'stl')
     result = blender_repair.export_model(model_path, output_format)
+    return jsonify(result)
+
+@app.route('/auto-sculpt', methods=['POST'])
+def run_auto_sculpt():
+    """Run automatic sculpting refinement (no manual sculpting needed)."""
+    data = request.json
+    result = auto_sculpt.run_auto_sculpt(data.get('model_path'), data.get('settings', {}))
     return jsonify(result)
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Plus, FolderOpen, Eye, CreditCard, Settings, LogOut, Layers } from 'lucide-react'
+import { LayoutDashboard, Plus, FolderOpen, Eye, Tablet, CreditCard, Settings, LogOut, Layers } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
@@ -9,6 +9,7 @@ const navItems = [
   { href: '/dashboard/new-project', label: 'New Project', icon: Plus },
   { href: '/dashboard/projects', label: 'My Projects', icon: FolderOpen },
   { href: '/dashboard/preview/demo', label: '3D Preview', icon: Eye },
+  { href: '/dashboard/nomad', label: 'Nomad Sculpt', icon: Tablet },
   { href: '/pricing', label: 'Pricing', icon: CreditCard },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ]

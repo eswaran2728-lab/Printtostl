@@ -25,6 +25,8 @@ const OPTIMIZATION_FLAGS = [
   { key: 'addDrainHoles', label: 'Add drain holes for resin' },
   { key: 'smoothSurface', label: 'Smooth surface' },
   { key: 'preserveFacialDetails', label: 'Preserve facial details' },
+  { key: 'autoSculpt', label: 'Auto-Sculpt (AI sculpting refinement)' },
+  { key: 'nomadExport', label: 'Also export Nomad Sculpt GLB' },
 ]
 
 const STEPS = ['Upload Images', 'Settings', 'Optimization', 'Size & Generate']
@@ -42,7 +44,7 @@ export default function NewProjectPage() {
   const [removeBackground, setRemoveBackground] = useState(true)
   const [enhanceImage, setEnhanceImage] = useState(true)
   const [flags, setFlags] = useState<OptFlags>(
-    Object.fromEntries(OPTIMIZATION_FLAGS.map(f => [f.key, f.key === 'thickenThinParts' || f.key === 'fillHoles' || f.key === 'fixNonManifold' || f.key === 'addFlatBase']))
+    Object.fromEntries(OPTIMIZATION_FLAGS.map(f => [f.key, f.key === 'thickenThinParts' || f.key === 'fillHoles' || f.key === 'fixNonManifold' || f.key === 'addFlatBase' || f.key === 'autoSculpt']))
   )
   const [height, setHeight] = useState('15')
   const [width, setWidth] = useState('8')
