@@ -30,12 +30,12 @@ export const WordReveal: React.FC<WordRevealProps> = ({ lines, fontSize = 62, to
           position: "absolute",
           top,
           left: 0,
-          right: 0,
+          right: 200,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           gap: 14,
-          padding: "0 110px",
+          padding: "0 40px",
         }}
       >
         {lines.map((line, lineIndex) => {

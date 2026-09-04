@@ -5,6 +5,8 @@ import { CTAButton } from "./CTAButton";
 import { Sparkles } from "./Sparkles";
 import { ShineSweep } from "./ShineSweep";
 import { ParticleBurst } from "./ParticleBurst";
+import { CutFlash } from "./CutFlash";
+import { TridentMark } from "./TridentMark";
 
 const FPS = 30;
 const DURATION_IN_SECONDS = 20;
@@ -24,24 +26,31 @@ export const MyComposition = () => {
 };
 
 // The source is a single 41s turntable shot of the statue (no cuts, no audio).
-// Instead of playing it start-to-finish, we pick the 4 strongest angles from the
-// rotation and cut between them, so the 20s edit reads as a deliberate reveal
-// rather than a raw clip trimmed at the end.
+// We pick 6 distinct angles from the rotation and cut between them fast, so
+// the 20s edit reads as an energetic reveal rather than a slow trim.
 const shot = (fromSec: number, toSec: number) => ({
   trimBefore: Math.round(fromSec * FPS),
   trimAfter: Math.round(toSec * FPS),
 });
 
-// Slow push-in on the hook shot only — makes the trident reveal feel intentional
-// instead of a static clip, without touching the calmer product beats.
+const beats = [
+  { fromSec: 9, toSec: 11, startFrame: 0, duration: 60 }, // hook: trident silhouette
+  { fromSec: 0, toSec: 4, startFrame: 60, duration: 120 }, // front detail
+  { fromSec: 13, toSec: 17, startFrame: 180, duration: 120 }, // side profile
+  { fromSec: 20, toSec: 24, startFrame: 300, duration: 120 }, // back/trident
+  { fromSec: 27, toSec: 30, startFrame: 420, duration: 90 }, // 3/4 angle
+  { fromSec: 35, toSec: 38, startFrame: 510, duration: 90 }, // final display
+];
+
+// Slow push-in on the hook shot only — makes the trident reveal feel intentional.
 const HookShot: React.FC = () => {
   const frame = useCurrentFrame();
-  const scale = interpolate(frame, [0, 90], [1, 1.14], { extrapolateRight: "clamp" });
+  const scale = interpolate(frame, [0, 60], [1, 1.18], { extrapolateRight: "clamp" });
 
   return (
     <OffthreadVideo
       src={staticFile("promo-source.mp4")}
-      {...shot(9, 12)}
+      {...shot(9, 11)}
       style={{ width: "100%", height: "100%", objectFit: "cover", transform: `scale(${scale})` }}
     />
   );
@@ -50,63 +59,49 @@ const HookShot: React.FC = () => {
 export const PromoVideo: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
-      {/* Hook (0-3s): dramatic side angle where the trident (Thiru Sulam) reads
-          clearly against the statue's silhouette — the visual is the hook, no
-          text competes with it. Slow push-in adds intent to the reveal. */}
-      <Sequence from={0} durationInFrames={90}>
-        <HookShot />
-      </Sequence>
+      {/* Footage: 6 fast-cut beats across different rotation angles. */}
+      {beats.map((b, i) => (
+        <Sequence key={i} from={b.startFrame} durationInFrames={b.duration}>
+          {i === 0 ? (
+            <HookShot />
+          ) : (
+            <OffthreadVideo
+              src={staticFile("promo-source.mp4")}
+              {...shot(b.fromSec, b.toSec)}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          )}
+        </Sequence>
+      ))}
 
-      {/* Beat 2 (3-10s): front-on angle showing the face, gold detailing and
-          craftsmanship — pairs with the product headline. */}
-      <Sequence from={90} durationInFrames={210}>
-        <OffthreadVideo
-          src={staticFile("promo-source.mp4")}
-          {...shot(0, 7)}
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-        />
-      </Sequence>
+      {/* A quick white flash + gold shine sweep on every cut, plus a small
+          particle pop, so each cut reads as a deliberate beat, not a splice. */}
+      {beats.map((b, i) => (
+        <Sequence key={`fx-${i}`} from={b.startFrame} durationInFrames={45}>
+          <CutFlash />
+          <ShineSweep />
+        </Sequence>
+      ))}
+      {beats.map((b, i) => (
+        <Sequence key={`burst-${i}`} from={b.startFrame} durationInFrames={30}>
+          <ParticleBurst originTop="50%" count={14} />
+        </Sequence>
+      ))}
 
-      {/* Beat 3 (10-16s): continues the rotation to a fresh angle for the
-          availability callout, avoiding repeating footage already shown. */}
-      <Sequence from={300} durationInFrames={180}>
-        <OffthreadVideo
-          src={staticFile("promo-source.mp4")}
-          {...shot(20, 26)}
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-        />
-      </Sequence>
-
-      {/* Beat 4 (16-20s): final display angle held for the CTA. */}
-      <Sequence from={480} durationInFrames={120}>
-        <OffthreadVideo
-          src={staticFile("promo-source.mp4")}
-          {...shot(35, 39)}
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-        />
-      </Sequence>
-
-      {/* Subtle gold ambient particles — devotional gold theme, kept light so
-          it never competes with the statue. */}
+      {/* Ambient gold particles throughout — increased density for a richer feel. */}
       <Sequence from={0} durationInFrames={DURATION_IN_FRAMES}>
-        <Sparkles count={14} />
+        <Sparkles count={24} />
       </Sequence>
 
-      {/* One light-sweep across the gold detailing at the start of each beat,
-          timed just after the cut so it reads as a highlight, not a loop. */}
-      <Sequence from={90} durationInFrames={45}>
-        <ShineSweep />
-      </Sequence>
-      <Sequence from={300} durationInFrames={45}>
-        <ShineSweep />
-      </Sequence>
-      <Sequence from={480} durationInFrames={45}>
-        <ShineSweep />
+      {/* Decorative trident glyph, echoing the statue's own Thiru Sulam —
+          bottom-left, clear of the statue and the text zone. */}
+      <Sequence from={0} durationInFrames={DURATION_IN_FRAMES}>
+        <TridentMark />
       </Sequence>
 
-      {/* Gold particle burst timed to the CTA button's entrance. */}
-      <Sequence from={480} durationInFrames={35}>
-        <ParticleBurst originTop="84%" />
+      {/* Extra CTA-specific burst for extra emphasis at the very end. */}
+      <Sequence from={510} durationInFrames={35}>
+        <ParticleBurst originTop="84%" count={24} />
       </Sequence>
 
       {/* Brand logo, persistent top-right corner, clear of the statue. */}
@@ -114,20 +109,30 @@ export const PromoVideo: React.FC = () => {
         <Logo />
       </Sequence>
 
-      {/* Headline over beat 2 — top wood-panel area is empty, keeps the statue's
-          face and gold detailing fully visible. */}
-      <Sequence from={90} durationInFrames={210}>
-        <WordReveal lines={["OUR UNIQUE SHIVA", "WITH THIRU SULAM"]} fontSize={54} top="6%" />
+      {/* Hook (0-2s): visual only, no text competing with the reveal. */}
+
+      {/* Beat 2 (2-6s): headline starts. */}
+      <Sequence from={60} durationInFrames={120}>
+        <WordReveal lines={["OUR UNIQUE SHIVA"]} fontSize={54} top="6%" />
       </Sequence>
 
-      {/* Availability callout over beat 3 */}
-      <Sequence from={300} durationInFrames={180}>
-        <WordReveal lines={["NOW AVAILABLE IN", "THE YELLOW BAG"]} fontSize={52} top="6%" />
-        <SubText text="Exclusive Handcrafted Piece" top="90%" fontSize={28} />
+      {/* Beat 3 (6-10s): headline continues. */}
+      <Sequence from={180} durationInFrames={120}>
+        <WordReveal lines={["WITH THIRU SULAM"]} fontSize={54} top="6%" />
       </Sequence>
 
-      {/* Urgency + CTA over beat 4 */}
-      <Sequence from={480} durationInFrames={120}>
+      {/* Beat 4 (10-14s): availability callout. */}
+      <Sequence from={300} durationInFrames={120}>
+        <WordReveal lines={["NOW AVAILABLE IN", "THE YELLOW BAG"]} fontSize={50} top="6%" />
+      </Sequence>
+
+      {/* Beat 5 (14-17s): craftsmanship line. */}
+      <Sequence from={420} durationInFrames={90}>
+        <SubText text="Exclusive Handcrafted Piece" top="8%" fontSize={30} />
+      </Sequence>
+
+      {/* Beat 6 (17-20s): urgency + CTA. */}
+      <Sequence from={510} durationInFrames={90}>
         <SubText text="LIMITED STOCK · DM TO ORDER" top="6%" fontSize={32} />
         <CTAButton />
       </Sequence>
