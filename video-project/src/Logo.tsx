@@ -20,23 +20,24 @@ export const Logo: React.FC = () => {
     <div
       style={{
         position: "absolute",
-        top: 48,
-        right: 40,
+        top: 40,
+        right: 24,
         opacity,
         transform: `scale(${scale}) translateY(${floatY}px)`,
       }}
     >
-      <div
+      {/* Logo art already has a black background with a baked-in glow — blend
+          it with "screen" so the black drops out and only the rose-gold mark
+          and its glow sit on top of the video. */}
+      <Img
+        src={staticFile("eshan-logo-v2.png")}
         style={{
-          background: "rgba(255,255,255,0.92)",
-          borderRadius: 20,
-          padding: "10px 14px",
-          boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
-          border: "1px solid rgba(202,163,119,0.5)",
+          width: 210,
+          height: "auto",
+          display: "block",
+          mixBlendMode: "screen",
         }}
-      >
-        <Img src={staticFile("eshan-logo.jpg")} style={{ width: 140, height: "auto", display: "block" }} />
-      </div>
+      />
     </div>
   );
 };
