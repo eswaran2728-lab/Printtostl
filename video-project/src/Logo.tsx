@@ -20,8 +20,8 @@ export const Logo: React.FC = () => {
     <div
       style={{
         position: "absolute",
-        top: 40,
-        right: 24,
+        top: 30,
+        right: 10,
         opacity,
         transform: `scale(${scale}) translateY(${floatY}px)`,
       }}
@@ -32,7 +32,7 @@ export const Logo: React.FC = () => {
       <Img
         src={staticFile("eshan-logo-v2.png")}
         style={{
-          width: 210,
+          width: 320,
           height: "auto",
           display: "block",
           mixBlendMode: "screen",
