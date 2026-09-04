@@ -7,6 +7,8 @@ import { ShineSweep } from "./ShineSweep";
 import { ParticleBurst } from "./ParticleBurst";
 import { CutFlash } from "./CutFlash";
 import { TridentMark } from "./TridentMark";
+import { RadialGlow } from "./RadialGlow";
+import { CornerFrame } from "./CornerFrame";
 
 const FPS = 30;
 const DURATION_IN_SECONDS = 20;
@@ -91,6 +93,18 @@ export const PromoVideo: React.FC = () => {
       {/* Ambient gold particles throughout — increased density for a richer feel. */}
       <Sequence from={0} durationInFrames={DURATION_IN_FRAMES}>
         <Sparkles count={24} />
+      </Sequence>
+
+      {/* Slow pulsing gold glow, screen-blended so it only lifts the dark
+          statue silhouette without washing out the wood background. */}
+      <Sequence from={0} durationInFrames={DURATION_IN_FRAMES}>
+        <RadialGlow />
+      </Sequence>
+
+      {/* Viewfinder-style corner brackets draw in on the hook, framing the
+          statue like a camera focusing on the product. */}
+      <Sequence from={0} durationInFrames={60}>
+        <CornerFrame />
       </Sequence>
 
       {/* Decorative trident glyph, echoing the statue's own Thiru Sulam —
