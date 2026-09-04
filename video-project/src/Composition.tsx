@@ -1,8 +1,10 @@
-import { Composition, OffthreadVideo, Sequence, staticFile, AbsoluteFill } from "remotion";
+import { Composition, OffthreadVideo, Sequence, staticFile, AbsoluteFill, useCurrentFrame, interpolate } from "remotion";
 import { Logo } from "./Logo";
 import { WordReveal, SubText } from "./PromoText";
 import { CTAButton } from "./CTAButton";
 import { Sparkles } from "./Sparkles";
+import { ShineSweep } from "./ShineSweep";
+import { ParticleBurst } from "./ParticleBurst";
 
 const FPS = 30;
 const DURATION_IN_SECONDS = 20;
@@ -30,18 +32,29 @@ const shot = (fromSec: number, toSec: number) => ({
   trimAfter: Math.round(toSec * FPS),
 });
 
+// Slow push-in on the hook shot only — makes the trident reveal feel intentional
+// instead of a static clip, without touching the calmer product beats.
+const HookShot: React.FC = () => {
+  const frame = useCurrentFrame();
+  const scale = interpolate(frame, [0, 90], [1, 1.14], { extrapolateRight: "clamp" });
+
+  return (
+    <OffthreadVideo
+      src={staticFile("promo-source.mp4")}
+      {...shot(9, 12)}
+      style={{ width: "100%", height: "100%", objectFit: "cover", transform: `scale(${scale})` }}
+    />
+  );
+};
+
 export const PromoVideo: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
       {/* Hook (0-3s): dramatic side angle where the trident (Thiru Sulam) reads
           clearly against the statue's silhouette — the visual is the hook, no
-          text competes with it. */}
+          text competes with it. Slow push-in adds intent to the reveal. */}
       <Sequence from={0} durationInFrames={90}>
-        <OffthreadVideo
-          src={staticFile("promo-source.mp4")}
-          {...shot(9, 12)}
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-        />
+        <HookShot />
       </Sequence>
 
       {/* Beat 2 (3-10s): front-on angle showing the face, gold detailing and
@@ -77,6 +90,23 @@ export const PromoVideo: React.FC = () => {
           it never competes with the statue. */}
       <Sequence from={0} durationInFrames={DURATION_IN_FRAMES}>
         <Sparkles count={14} />
+      </Sequence>
+
+      {/* One light-sweep across the gold detailing at the start of each beat,
+          timed just after the cut so it reads as a highlight, not a loop. */}
+      <Sequence from={90} durationInFrames={45}>
+        <ShineSweep />
+      </Sequence>
+      <Sequence from={300} durationInFrames={45}>
+        <ShineSweep />
+      </Sequence>
+      <Sequence from={480} durationInFrames={45}>
+        <ShineSweep />
+      </Sequence>
+
+      {/* Gold particle burst timed to the CTA button's entrance. */}
+      <Sequence from={480} durationInFrames={35}>
+        <ParticleBurst originTop="84%" />
       </Sequence>
 
       {/* Brand logo, persistent top-right corner, clear of the statue. */}
