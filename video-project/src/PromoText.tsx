@@ -1,8 +1,6 @@
 import React from "react";
 import { useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
 
-const GOLD = "linear-gradient(135deg, #f3d9b1 0%, #caa377 45%, #8a6a45 100%)";
-
 type WordRevealProps = {
   lines: string[];
   fontSize?: number;
@@ -14,70 +12,83 @@ export const WordReveal: React.FC<WordRevealProps> = ({ lines, fontSize = 62, to
   const { fps } = useVideoConfig();
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        top,
-        left: 0,
-        right: 0,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 14,
-        padding: "0 60px",
-      }}
-    >
-      {lines.map((line, lineIndex) => {
-        const words = line.split(" ");
-        return (
-          <div
-            key={lineIndex}
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              justifyContent: "center",
-              gap: 14,
-            }}
-          >
-            {words.map((word, wordIndex) => {
-              const delay = lineIndex * 8 + wordIndex * 4;
-              const localFrame = frame - delay;
-              const enter = spring({
-                frame: localFrame,
-                fps,
-                config: { damping: 16, stiffness: 140, mass: 0.5 },
-              });
-              const opacity = interpolate(localFrame, [0, 10], [0, 1], {
-                extrapolateLeft: "clamp",
-                extrapolateRight: "clamp",
-              });
-              const y = interpolate(enter, [0, 1], [40, 0]);
+    <>
+      {/* Dark scrim so white text stays legible over the light wood panel. */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 260,
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.18) 70%, rgba(0,0,0,0) 100%)",
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          top,
+          left: 0,
+          right: 0,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 14,
+          padding: "0 110px",
+        }}
+      >
+        {lines.map((line, lineIndex) => {
+          const words = line.split(" ");
+          return (
+            <div
+              key={lineIndex}
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                justifyContent: "center",
+                gap: 14,
+              }}
+            >
+              {words.map((word, wordIndex) => {
+                const delay = lineIndex * 8 + wordIndex * 4;
+                const localFrame = frame - delay;
+                const enter = spring({
+                  frame: localFrame,
+                  fps,
+                  config: { damping: 16, stiffness: 140, mass: 0.5 },
+                });
+                const opacity = interpolate(localFrame, [0, 10], [0, 1], {
+                  extrapolateLeft: "clamp",
+                  extrapolateRight: "clamp",
+                });
+                const y = interpolate(enter, [0, 1], [40, 0]);
 
-              return (
-                <span
-                  key={wordIndex}
-                  style={{
-                    opacity,
-                    transform: `translateY(${y}px)`,
-                    fontFamily: "Georgia, 'Times New Roman', serif",
-                    fontWeight: 700,
-                    fontSize,
-                    letterSpacing: 1,
-                    backgroundImage: GOLD,
-                    WebkitBackgroundClip: "text",
-                    backgroundClip: "text",
-                    color: "transparent",
-                    textShadow: "0 2px 18px rgba(0,0,0,0.55)",
-                  }}
-                >
-                  {word}
-                </span>
-              );
-            })}
-          </div>
-        );
-      })}
-    </div>
+                return (
+                  <span
+                    key={wordIndex}
+                    style={{
+                      opacity,
+                      transform: `translateY(${y}px)`,
+                      fontFamily: "Georgia, 'Times New Roman', serif",
+                      fontWeight: 700,
+                      fontSize,
+                      letterSpacing: 1,
+                      color: "#ffffff",
+                      WebkitTextStroke: "1.5px rgba(138,106,69,0.9)",
+                      textShadow:
+                        "0 2px 6px rgba(0,0,0,0.9), 0 4px 24px rgba(0,0,0,0.85), 0 0 30px rgba(202,163,119,0.5)",
+                    }}
+                  >
+                    {word}
+                  </span>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+    </>
   );
 };
 
