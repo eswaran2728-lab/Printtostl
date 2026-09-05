@@ -1,7 +1,7 @@
 import React from "react";
 import { useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
 
-export const CTAButton: React.FC = () => {
+export const CTAButton: React.FC<{ text?: string; fontSize?: number }> = ({ text = "SHOP NOW", fontSize = 40 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
@@ -26,8 +26,9 @@ export const CTAButton: React.FC = () => {
       <div
         style={{
           background: "linear-gradient(135deg, #f3d9b1 0%, #caa377 50%, #8a6a45 100%)",
-          padding: "22px 56px",
-          borderRadius: 50,
+          padding: "20px 40px",
+          borderRadius: 40,
+          maxWidth: "82%",
           boxShadow: `0 0 ${30 + glow * 30}px rgba(202,163,119,${0.5 + glow * 0.3}), 0 10px 30px rgba(0,0,0,0.5)`,
         }}
       >
@@ -35,12 +36,14 @@ export const CTAButton: React.FC = () => {
           style={{
             fontFamily: "'Helvetica Neue', Arial, sans-serif",
             fontWeight: 800,
-            fontSize: 40,
+            fontSize,
             color: "#2a1d10",
-            letterSpacing: 1.5,
+            letterSpacing: 0.8,
+            textAlign: "center",
+            display: "block",
           }}
         >
-          SHOP NOW
+          {text}
         </span>
       </div>
     </div>
