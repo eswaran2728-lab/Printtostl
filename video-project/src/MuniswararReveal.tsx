@@ -143,26 +143,38 @@ export const MuniswararVideo: React.FC = () => {
 
       {/* Beat 2 text */}
       <Sequence from={39} durationInFrames={60}>
-        <SubText text="Straight off the printer" top="6%" fontSize={34} />
+        <SubText
+          text="Straight off the printer"
+          top="6%"
+          fontSize={46}
+          fontFamily="Georgia, 'Times New Roman', serif"
+          fontWeight={700}
+        />
       </Sequence>
 
       {/* Beat 3 text */}
       <Sequence from={99} durationInFrames={144}>
-        <WordReveal lines={["OUR 3 FEET", "JALAN BARU MUNISWARAR"]} fontSize={46} top="6%" />
+        <WordReveal lines={["OUR 3 FEET", "JALAN BARU MUNISWARAR"]} fontSize={62} top="4%" />
       </Sequence>
 
       {/* Closing message (last ~3s of beat 6) */}
       <Sequence from={355} durationInFrames={95}>
         <SubText
           text="Painting & finishing coming soon — follow for the full build 🙏"
-          top="72%"
-          fontSize={26}
+          top="68%"
+          fontSize={34}
+          fontFamily="Georgia, 'Times New Roman', serif"
+          fontWeight={700}
         />
       </Sequence>
 
       {/* CTA (final ~1.3s) */}
       <Sequence from={410} durationInFrames={40}>
-        <CTAButton text="Need it in a different size? DM us!" fontSize={24} />
+        <CTAButton
+          text="Need it in a different size? DM us!"
+          fontSize={32}
+          fontFamily="Georgia, 'Times New Roman', serif"
+        />
       </Sequence>
     </AbsoluteFill>
   );

@@ -92,10 +92,18 @@ export const WordReveal: React.FC<WordRevealProps> = ({ lines, fontSize = 62, to
   );
 };
 
-export const SubText: React.FC<{ text: string; top?: number | string; fontSize?: number }> = ({
+export const SubText: React.FC<{
+  text: string;
+  top?: number | string;
+  fontSize?: number;
+  fontFamily?: string;
+  fontWeight?: number;
+}> = ({
   text,
   top = "60%",
   fontSize = 34,
+  fontFamily = "'Helvetica Neue', Arial, sans-serif",
+  fontWeight = 600,
 }) => {
   const frame = useCurrentFrame();
   const opacity = interpolate(frame, [0, 15], [0, 1], { extrapolateRight: "clamp" });
@@ -116,8 +124,8 @@ export const SubText: React.FC<{ text: string; top?: number | string; fontSize?:
     >
       <span
         style={{
-          fontFamily: "'Helvetica Neue', Arial, sans-serif",
-          fontWeight: 600,
+          fontFamily,
+          fontWeight,
           fontSize,
           color: "#fff8ef",
           textShadow: "0 2px 10px rgba(0,0,0,0.7)",
