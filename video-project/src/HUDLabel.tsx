@@ -57,7 +57,7 @@ export const StatusHUD: React.FC<{ delay?: number }> = ({ delay = 0 }) => {
     <div
       style={{
         position: "absolute",
-        top: "10%",
+        top: 300,
         right: 40,
         opacity,
         textAlign: "right",
