@@ -41,7 +41,7 @@ const footageStyle: React.CSSProperties = {
 const Footage: React.FC<{ src: string; dim?: boolean }> = ({ src, dim }) => (
   <>
     <OffthreadVideo src={src} style={footageStyle} />
-    {dim && <AbsoluteFill style={{ background: VECTA.navyDeep, opacity: 0.45 }} />}
+    {dim && <AbsoluteFill style={{ background: VECTA.navyDeep, opacity: 0.74 }} />}
     <CinematicVignette />
   </>
 );
@@ -167,8 +167,8 @@ export const VectaFilmVideo: React.FC = () => {
       <Sequence from={870} durationInFrames={240}>
         <NavyBG />
         <SectionTitle text="SYSTEM EVOLUTION" delay={6} fontSize={44} top="10%" />
-        <ArchitectureNode title="CSCS" x={140} y={480} delay={30} dim />
-        <ArchitectureConnector x1={360} y1={520} x2={560} y2={520} delay={45} pulse pulseDelay={50} />
+        <ArchitectureNode title="CSCS" x={175} y={480} delay={30} dim />
+        <ArchitectureConnector x1={395} y1={520} x2={560} y2={520} delay={45} pulse pulseDelay={50} />
         <ArchitectureNode title="ICMS" x={560} y={480} delay={55} dim />
         <ArchitectureConnector x1={780} y1={520} x2={980} y2={520} delay={70} pulse pulseDelay={75} />
         <ArchitectureNode title="AVSEC REPORTS" x={980} y={480} delay={80} dim width={240} />
@@ -542,22 +542,9 @@ export const VectaFilmVideo: React.FC = () => {
       <Sequence from={3516} durationInFrames={14}>
         <FadeThroughNavy mode="in" durationInFrames={14} />
       </Sequence>
-      <Sequence from={3560} durationInFrames={190}>
-        <div style={{ position: "absolute", top: "36%", left: 0, right: 0 }}>
-          <VectaTitle delay={0} scale={0.85} />
-          <div style={{ marginTop: 24 }}>
-            <Subtitle text={"Versatile Enforcement, Continuity,\nTraceability & Audit"} delay={30} fontSize={20} />
-          </div>
-          <Sequence from={70} durationInFrames={120}>
-            <Subtitle
-              text={"ONE PLATFORM.\nCONNECTED OPERATIONS.\nCOMPLETE TRACEABILITY."}
-              top="72%"
-              fontSize={22}
-              color={VECTA.white}
-            />
-          </Sequence>
-        </div>
-      </Sequence>
+      {/* The footage already carries VECTA's own correctly-spelled closing
+          title card (globe + wordmark + tagline) — we hold on it rather than
+          layering a duplicate title on top, which produced doubled text. */}
       <Sequence from={3720} durationInFrames={30}>
         <FadeThroughNavy mode="out" durationInFrames={30} />
       </Sequence>
