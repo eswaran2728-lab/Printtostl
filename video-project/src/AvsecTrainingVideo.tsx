@@ -7,8 +7,16 @@ import {
   staticFile,
   Composition,
 } from "remotion";
-import { FPS, sec, VIDEO_PARTS, JOIN_FADE_FRAMES, totalOutputFrames } from "./data/scenes";
+import {
+  FPS,
+  sec,
+  VIDEO_PARTS,
+  JOIN_FADE_FRAMES,
+  AUDIO_CROSSFADE_FRAMES,
+  totalOutputFrames,
+} from "./data/scenes";
 import { REPLACEMENT_LINES } from "./data/dialogueReplacement";
+import { DIALOGUE_AUDIO_AVAILABLE } from "./data/audioAvailability.generated";
 import { GAP_FILL_CAPTIONS } from "./data/captions";
 import { BLUR_REGIONS } from "./data/privacy";
 import { Caption, cueDurationFrames } from "./components/Captions";
@@ -27,7 +35,6 @@ interface ResolvedPart {
   id: string;
   sourceFrom: number; // seconds
   sourceTo: number; // seconds
-  mute: boolean;
   outputFrom: number; // output frames
   durationInFrames: number;
 }
@@ -40,7 +47,6 @@ function resolveParts(): ResolvedPart[] {
       id: part.id,
       sourceFrom: part.from,
       sourceTo: part.to,
-      mute: part.mute,
       outputFrom: cursor,
       durationInFrames,
     };
@@ -49,13 +55,45 @@ function resolveParts(): ResolvedPart[] {
   });
 }
 
-/** Converts an absolute SOURCE-video second into an output frame, given
- * which resolved part contains it. Returns null if no part covers it
- * (e.g. it falls inside the trimmed black-frame gap). */
 function sourceSecToOutputFrame(parts: ResolvedPart[], sourceSec: number): number | null {
   const part = parts.find((p) => sourceSec >= p.sourceFrom && sourceSec <= p.sourceTo);
   if (!part) return null;
   return part.outputFrom + sec(sourceSec - part.sourceFrom);
+}
+
+/** Builds the per-frame volume function for the source video's OWN embedded
+ * narration track, covering one resolved part. Outside the mis-voiced
+ * 19.0-59.3s block it is always 1 (untouched). Inside that block, for each
+ * line: if a real replacement WAV is available, duck the original to 0
+ * (crossfaded) so the replacement clip is heard instead; if not available,
+ * leave the original narration at 1 so the section is never silent. Between
+ * lines (natural speech pauses) the original also stays at 1 — there is
+ * nothing there to replace. */
+function makeOriginalNarrationVolume(part: ResolvedPart, allParts: ResolvedPart[]) {
+  const xfade = AUDIO_CROSSFADE_FRAMES;
+  return (frame: number) => {
+    const outputFrame = part.outputFrom + frame;
+
+    for (const line of REPLACEMENT_LINES) {
+      const available = DIALOGUE_AUDIO_AVAILABLE[line.file] === true;
+      if (!available) continue; // fallback: original stays audible
+      const lineStartFrame = sourceSecToOutputFrame(allParts, line.start);
+      const lineEndFrame = sourceSecToOutputFrame(allParts, line.end);
+      if (lineStartFrame === null || lineEndFrame === null) continue;
+      if (outputFrame < lineStartFrame - xfade || outputFrame > lineEndFrame + xfade) continue;
+
+      if (outputFrame < lineStartFrame) {
+        // ramping down into the replacement clip
+        return 1 - (outputFrame - (lineStartFrame - xfade)) / xfade;
+      }
+      if (outputFrame > lineEndFrame) {
+        // ramping back up after the replacement clip
+        return (outputFrame - lineEndFrame) / xfade;
+      }
+      return 0; // fully replaced
+    }
+    return 1;
+  };
 }
 
 const Timeline: React.FC = () => {
@@ -63,8 +101,9 @@ const Timeline: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ background: "#000" }}>
-      {/* ---- Video parts (trims the black-frame glitch + CapCut tail; mutes
-          the confirmed mis-voiced narrator block, p2) ---- */}
+      {/* ---- Video parts: split ONLY at the one confirmed black-frame
+          defect. The narrator-replacement block does NOT get a video cut —
+          see scenes.ts for why. ---- */}
       {parts.map((part) => (
         <Sequence key={part.id} from={part.outputFrom} durationInFrames={part.durationInFrames}>
           <AbsoluteFill style={{ filter: GRADE_FILTER }}>
@@ -72,12 +111,11 @@ const Timeline: React.FC = () => {
               src={SOURCE}
               startFrom={sec(part.sourceFrom)}
               endAt={sec(part.sourceTo)}
-              muted={part.mute}
-              volume={part.mute ? 0 : 1}
+              volume={makeOriginalNarrationVolume(part, parts)}
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
           </AbsoluteFill>
-          {/* short fade-through-black at both ends of every part join */}
+          {/* fade-through-black only around the real black-frame cut */}
           <Sequence from={0} durationInFrames={JOIN_FADE_FRAMES}>
             <JoinFade mode="in" frames={JOIN_FADE_FRAMES} />
           </Sequence>
@@ -90,16 +128,28 @@ const Timeline: React.FC = () => {
         </Sequence>
       ))}
 
-      {/* ---- Replacement dialogue: silent placeholders now. Dropping the
-          real WAV at the same public/audio/dialogue/<file> path is the only
-          change needed later — this Sequence wiring does not change. ---- */}
+      {/* ---- Replacement dialogue: only rendered once a real (non-silent)
+          WAV has been dropped at the matching path — see
+          audioAvailability.generated.ts / scripts/check-dialogue-audio.mjs.
+          Until then the original narration (above) fills the gap instead
+          of silence. Each clip gets a short in/out crossfade. ---- */}
       {REPLACEMENT_LINES.map((line) => {
+        const available = DIALOGUE_AUDIO_AVAILABLE[line.file] === true;
+        if (!available) return null;
         const outputFrom = sourceSecToOutputFrame(parts, line.start);
         if (outputFrom === null) return null;
         const durationInFrames = sec(line.end - line.start);
+        const xfade = AUDIO_CROSSFADE_FRAMES;
         return (
           <Sequence key={line.file} from={outputFrom} durationInFrames={durationInFrames}>
-            <Audio src={staticFile(`audio/dialogue/${line.file}`)} volume={1} />
+            <Audio
+              src={staticFile(`audio/dialogue/${line.file}`)}
+              volume={(f) => {
+                if (f < xfade) return f / xfade;
+                if (f > durationInFrames - xfade) return (durationInFrames - f) / xfade;
+                return 1;
+              }}
+            />
           </Sequence>
         );
       })}
@@ -128,9 +178,10 @@ const Timeline: React.FC = () => {
         );
       })}
 
-      {/* ---- Music bed: fades in at open, sits well under dialogue,
-          fades to a clean resolution at the end (see corporate-bed.wav,
-          which already carries its own 2s in/out fade). ---- */}
+      {/* ---- Music bed: sits under the narration throughout (never muted
+          by the narration logic above), fades in at open, fades to a clean
+          resolution at the end (corporate-bed.wav carries its own 2s
+          in/out fade). ---- */}
       <Audio src={MUSIC} volume={0.16} />
     </AbsoluteFill>
   );
