@@ -11,20 +11,22 @@ export const sec = (s: number) => Math.round(s * FPS);
  * top — not re-cutting scene order, which is correct already.
  *
  * Defects found by full frame-by-frame + audio (pitch/RMS) inspection:
- *  - A single dropped black frame at 74.83-75.17s (hard scene cut glitch) —
- *    the ONLY point that needs an actual video cut.
+ *  - A ~1.3s dip to black-and-back at 57.3-58.6s (a fade transition baked
+ *    into the source between the overhead item-checklist shot and the
+ *    seated-presenter shot) — cut out and rejoined with a short fade.
+ *  - A single dropped black frame at 74.83-75.17s (hard scene cut glitch).
  *  - A CapCut export watermark burned onto the tail from ~117.9s to 120.12s.
  *
- * IMPORTANT: the narrator-replacement block (19.0-59.3s) does NOT get its
- * own video cut. It sits entirely inside the same continuous shot as the
- * footage before and after it, so splitting it into a separate <Sequence>
- * (as an earlier version of this file did) forced an artificial fade/cut at
- * 59.3s where the source has none — visible as an unwanted near-black
- * moment around 00:58-00:59 in review. Audio-only fallback/replacement
+ * IMPORTANT: neither of the two black-frame cuts above lines up with the
+ * narrator-replacement block's own start/end (19.0s / 59.3s) — that block
+ * does NOT get a video cut of its own. Audio-only fallback/replacement
  * logic (see AvsecTrainingVideo.tsx's per-frame `volume` function) handles
- * that block without ever touching the video track.
+ * it without ever touching the video track, so the 57.3-58.6s cut below
+ * simply falls inside it like any other frame.
  */
 export const DEFECTS = {
+  blackDipStart: 57.3,
+  blackDipEnd: 58.6,
   blackFrameStart: 74.83,
   blackFrameEnd: 75.17,
   cleanContentEnd: 117.9, // CapCut watermark begins after this
@@ -36,11 +38,13 @@ export const DEFECTS = {
 export const NARRATION_REPLACE_START = 19.0;
 export const NARRATION_REPLACE_END = 59.3;
 
-/** The two contiguous source-video parts that make up the output timeline —
- * split ONLY at the real black-frame defect, nowhere else. */
+/** The three contiguous source-video parts that make up the output
+ * timeline — split ONLY at the two real black-frame defects, nowhere
+ * else. */
 export const VIDEO_PARTS = [
-  { id: "p1", from: 0, to: DEFECTS.blackFrameStart },
-  { id: "p2", from: DEFECTS.blackFrameEnd, to: DEFECTS.cleanContentEnd },
+  { id: "p1", from: 0, to: DEFECTS.blackDipStart },
+  { id: "p2", from: DEFECTS.blackDipEnd, to: DEFECTS.blackFrameStart },
+  { id: "p3", from: DEFECTS.blackFrameEnd, to: DEFECTS.cleanContentEnd },
 ] as const;
 
 /** Short fade-through-black micro-transition applied at the one real video
