@@ -4,6 +4,7 @@ import { MuniswararComposition } from "./MuniswararReveal";
 import { KaaliammanComposition } from "./KaaliammanReveal";
 import { VectaComposition } from "./VectaFilm";
 import { AvsecComposition } from "./AvsecTrainingVideo";
+import { NeePonaPinneComposition } from "./NeePonaPinne";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -13,6 +14,7 @@ export const RemotionRoot: React.FC = () => {
       <KaaliammanComposition />
       <VectaComposition />
       <AvsecComposition />
+      <NeePonaPinneComposition />
     </>
   );
 };

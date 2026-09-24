@@ -5,3 +5,8 @@ dist
 
 # Ignore the output video from Git but not videos you import into src/.
 out
+
+# Large source media supplied directly by the user (not committed — too
+# large for GitHub's 100MB hard limit); regenerate by copying the original
+# upload back into place if this checkout is re-cloned.
+public/media/nee-pona-pinne/source-master.mp4
