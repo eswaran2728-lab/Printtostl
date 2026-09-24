@@ -2,17 +2,28 @@ import React from "react";
 import { AbsoluteFill, Audio, Sequence, Composition } from "remotion";
 import { EDL } from "./editDecisionList";
 import { SceneClip } from "./components/SceneClip";
-import { OpeningTitle, TAMIL_FONT_FACES } from "./components/OpeningTitle";
 import { FinalCredits } from "./components/FinalCredits";
 import { FilmFinish } from "./components/FilmFinish";
 import { FilmGrain } from "./components/FilmGrain";
 import { SONG_SRC, SONG_VOLUME } from "./audioPlan";
+import { useNppFonts } from "./hooks/useNppFonts";
 
 const FPS = 30;
 export const TOTAL_FRAMES = 5291;
 const FILM_FINISH_FRAMES = 10;
 
 const DEV_OVERLAY_DEFAULT = false;
+
+// NOTE: OpeningTitle (src/components/OpeningTitle.tsx) is deliberately NOT
+// rendered here. Frame-by-frame inspection of the source master found that
+// Scene 1's own footage already carries a professionally composited title
+// card — "நீ போன பின்னே" / "NEE PONA PINNE", warm off-white, lower-third,
+// fading in ~1.0s and out ~5.5s — baked into the pixels from roughly 1.0 to
+// 5.5 SOURCE seconds (fully inside the 0-6.195s range Scene 1 uses).
+// Layering OpeningTitle on top produced a visible doubled-title artifact
+// (confirmed via still-frame render, not a font-loading race as first
+// suspected). The component is kept for reference/reuse if a future cut
+// uses different Scene 1 footage without a native title.
 
 interface ResolvedScene {
   outputFrom: number;
@@ -74,17 +85,15 @@ export const NeePonaPinneTimeline: React.FC<{ devOverlay?: boolean }> = ({
   devOverlay = DEV_OVERLAY_DEFAULT,
 }) => {
   const scenes = resolveScenes();
+  useNppFonts();
 
   return (
     <AbsoluteFill style={{ background: "#000" }}>
-      <style>{TAMIL_FONT_FACES}</style>
-
       {EDL.map((row, i) => {
         const scene = scenes[i];
         return (
           <Sequence key={row.scene} from={scene.outputFrom} durationInFrames={scene.durationInFrames}>
             <SceneClip row={row} devOverlay={devOverlay} />
-            {row.scene === 1 && <OpeningTitle />}
           </Sequence>
         );
       })}
